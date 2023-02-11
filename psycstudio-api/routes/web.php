@@ -31,6 +31,7 @@ Route::post("/api/user/login", [UserController::class, "login"]);
 Route::post("/api/user/token-control", [UserController::class, "tokenControl"]);
 Route::put("/api/user/update", [UserController::class, "update"]);
 Route::post("/api/user/upload", [UserController::class, "upload"])->middleware(ApiAuthMiddleware::class);
+Route::get("/api/user/avatar/{filename}", [UserController::class, "getImage"]);
 
 
 //Therapist Routes
