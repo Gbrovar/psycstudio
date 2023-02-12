@@ -6,7 +6,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
-//use App\Models\Therapist;
+use App\Models\Therapist;
 
 class JwtAuth{
     
@@ -19,11 +19,12 @@ class JwtAuth{
 
 
     public function signup($email, $password, $getToken = null) {
-        //Buscar si existe el usuario con sis credenciales
-        $user = User::Where([
+        //Buscar si existe el usuario con sus credenciales
+        $user = User::Where([   // <---- Aqui hay que buscar tambien al terapueuta. 
                     'email' => $email,
                     'password' => $password,
         ])->first();
+        var_dump($user); die();
         //comprobar si son correctas
         $signup = false;
         if(is_object($user)){
