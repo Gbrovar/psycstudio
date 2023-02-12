@@ -36,9 +36,9 @@ Route::get("/api/user/avatar/{filename}", [UserController::class, "getImage"]);
 
 //Therapist Routes
 Route::post("/api/therapist/register", [TherapistController::class, "register"]);
-Route::post("/api/therapist/login", [UserController::class, "login"]);
-Route::post("/api/therapist/token-control", [UserController::class, "tokenControl"]);
-Route::put("/api/therapist/update", [UserController::class, "update"]);
-Route::post("/api/therapist/upload", [UserController::class, "upload"])->middleware(ApiAuthMiddleware::class);
-Route::get("/api/therapist/avatar/{filename}", [UserController::class, "getImage"]);
+Route::post("/api/therapist/login", [TherapistController::class, "login"]);
+Route::post("/api/therapist/token-control", [TherapistController::class, "tokenControl"]);
+Route::put("/api/therapist/update", [TherapistController::class, "update"]);
+Route::post("/api/therapist/upload", [TherapistController::class, "upload"])->middleware(ApiAuthMiddleware::class);
+Route::get("/api/therapist/avatar/{filename}", [TherapistController::class, "getImage"]);
 
