@@ -40,7 +40,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        
+        'therapist' => [
+            'driver' => 'session',
+            'provider' => 'therapists',
+        ],
     ],
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -63,6 +69,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+        
+        'therapists' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Therapist::class,
         ],
 
         // 'users' => [
@@ -89,6 +100,12 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'therapists' => [
+            'provider' => 'therapists',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
