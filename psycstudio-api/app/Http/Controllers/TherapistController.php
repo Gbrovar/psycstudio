@@ -86,4 +86,184 @@ class TherapistController extends Controller
 
         return response()->json($data, $data['code']);
     }
+    
+        
+    //metodo de login de Therapist
+    public function login(Request $request) {
+        $jwtAuth = new \JwtAuth();
+        
+        //recibir datos por POST
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+        //Validar datos recibidos
+        $validate = \Validator::make($params_array, [
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+        
+        if ($validate->fails()) {
+            //la validación ha fallado.
+            $signup = array(
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'El usuario Terapeuta no se ha podido identificar',
+                'error' => $validate->errors()
+            );
+        } else {
+            //Cifrar el password
+            $pwd = hash('sha256' , $params->password);
+            
+            
+            //Devolver token
+            $signup = $jwtAuth->signup($params->email, $pwd);
+
+            if (!empty($params->gettoken)) {
+                $signup = $jwtAuth->signup($params->email, $pwd, true);
+            }
+        }
+        
+        return response()->json($signup, 200);
+        
+    }
+    
+    //metodo tokenControl
+    public function tokenControl(Request $request) {
+        $token = $request->header('Authorization');
+        $jwtAuth = new \JwtAuth();
+        $checkToken = $jwtAuth->checkToken($token);
+        
+       
+
+        if($checkToken){
+           $data = array(
+              'code' => 200,
+              'status' => 'success',
+              'message' => 'El usuario Terapeuta esta identificado.'
+          );
+        }else{
+          $data = array(
+              'code' => 400,
+              'status' => 'error',
+              'message' => 'El usuario Terapeuta NO esta identificado.'
+          );
+        }
+        
+        return response()->json($data, $data['code']);
+    }
+    
+        
+    
+    //update method
+    public function update(Request $request){
+
+      // Comprobar si el usuario esta identificado.
+      $token = $request->header('Authorization');
+      $jwtAuth = new \JwtAuth();
+      $checkToken = $jwtAuth->checkToken($token);
+
+      //collect user data
+      $json = $request->input('json', null);
+      $params_array = json_decode($json, true);
+      
+      if($checkToken && !empty($params_array)){
+
+        //bring identified user
+        $user = $jwtAuth->checkToken($token, true);
+
+        //validate data
+        $validate = \Validator::make($params_array, [
+          'name' => 'required|alpha',
+          'surname' => 'required|alpha',
+          'email' => 'required|email|unique:users'.$user->sub
+        ]);
+
+        //remove the values we don't want to update
+        unset($params_array['id']);
+        unset($params_array['password']);
+        unset($params_array['role']);
+        unset($params_array['remember_token']);
+        unset($params_array['created_at']);
+
+
+        //update user in DB
+        $user_update = Therapist::where('id', $user->sub)->update($params_array);
+
+        //return result
+        $data = array(
+          'code' => 200,
+          'status' => 'success',
+          'message' => 'El usuario Terapeuta se ha actualizado.',
+          'user' => $user,
+          'changes' => $params_array
+        );
+
+      } else {
+        $data = array(
+          'code' => 400,
+          'status' => 'error',
+          'message' => 'El usuario Terapeuta no está identificado.'
+        );
+      }
+
+      return response()->json($data, $data['code']);
+    }
+    
+    //upload method
+    public function upload(Request $request){
+        
+        //get data of request
+        $image = $request->file('file0');
+        
+        //Validate image
+        $validate = \Validator::make($request->all(), [
+            'file0' => 'required|image|mimes:jpg, jpeg, png, gif'
+        ]);
+        
+        //upload & save image
+        if(!$image || $validate->fails()){
+            $data = array(
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error al subir imagen.'
+              );
+        }else{
+            $image_name = time().$image->getClientOriginalName();
+            \Storage::disk('therapist_images')->put($image_name, \File::get($image));
+            
+            //return response data
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            );
+        }
+        
+        return response($data, $data['code']);
+    }
+    
+    //method get image
+    public function getImage($filename){
+        
+        $isset = \Storage::disk('therapist_images')->exists($filename);
+        
+        if($isset){
+            $file = \Storage::disk('therapist_images')->get($filename);
+            return new Response($file, 200);
+        } else {
+            $data = array(
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error, la imagen no existe'
+              );
+            
+            return response($data, $data['code']);
+            
+        }
+
+    }
+
+    
+    
 }
