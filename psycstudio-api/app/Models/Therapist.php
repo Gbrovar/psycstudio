@@ -12,6 +12,7 @@ class Therapist extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $table = 'therapists';
     /**
      * The attributes that are mass assignable.
      *
@@ -19,6 +20,7 @@ class Therapist extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'surname',
         'email',
         'password',
     ];
