@@ -20,11 +20,13 @@ class JwtAuth{
 
     public function signup($email, $password, $getToken = null) {
         //Buscar si existe el usuario con sus credenciales
+
         $user = User::Where([   // <---- Aqui hay que buscar tambien al terapueuta. 
                     'email' => $email,
                     'password' => $password,
         ])->first();
-        var_dump($user); die();
+
+        //var_dump($user); die();
         //comprobar si son correctas
         $signup = false;
         if(is_object($user)){

@@ -14,7 +14,8 @@ class Therapist extends Authenticatable
 
     protected $guard = 'therapist';
     
-    //protected $table = 'therapists';
+    protected $table = 'therapists';
+    
     /**
      * The attributes that are mass assignable.
      *
