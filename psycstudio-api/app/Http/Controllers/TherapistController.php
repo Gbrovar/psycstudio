@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Models\Therapist;
 
 class TherapistController extends Controller
@@ -56,7 +57,7 @@ class TherapistController extends Controller
                 //validación pasada correctamente
           
                 //cifrar la contraseña
-                $pwd = password_hash($params->password, PASSWORD_BCRYPT, ['cost' => 10]);
+                $pwd = hash('sha256', $params->password);
                                 
                 //crear terapeuta
                 $therapist = new Therapist();
@@ -133,8 +134,6 @@ class TherapistController extends Controller
         $token = $request->header('Authorization');
         $jwtAuth = new \JwtAuth();
         $checkToken = $jwtAuth->checkToken($token);
-        
-       
 
         if($checkToken){
            $data = array(
@@ -171,34 +170,46 @@ class TherapistController extends Controller
 
         //bring identified user
         $user = $jwtAuth->checkToken($token, true);
+        
+        $userId = Therapist::where('id', $user->sub)
+                ->where('role', $user->role)
+                ->first();
+        
+        
+        if(!is_null($userId)){
+            //validate data
+            $validate = \Validator::make($params_array, [
+              'name' => 'required|alpha',
+              'surname' => 'required|alpha',
+              'email' => 'required|email|unique:users'.$user->sub
+            ]);
 
-        //validate data
-        $validate = \Validator::make($params_array, [
-          'name' => 'required|alpha',
-          'surname' => 'required|alpha',
-          'email' => 'required|email|unique:users'.$user->sub
-        ]);
-
-        //remove the values we don't want to update
-        unset($params_array['id']);
-        unset($params_array['password']);
-        unset($params_array['role']);
-        unset($params_array['remember_token']);
-        unset($params_array['created_at']);
+            //remove the values we don't want to update
+            unset($params_array['id']);
+            unset($params_array['password']);
+            unset($params_array['role']);
+            unset($params_array['remember_token']);
+            unset($params_array['created_at']);
 
 
-        //update user in DB
-        $user_update = Therapist::where('id', $user->sub)->update($params_array);
+            //update user in DB
+            $user_update = Therapist::where('id', $user->sub)->update($params_array);
 
-        //return result
-        $data = array(
-          'code' => 200,
-          'status' => 'success',
-          'message' => 'El usuario Terapeuta se ha actualizado.',
-          'user' => $user,
-          'changes' => $params_array
-        );
-
+            //return result
+            $data = array(
+              'code' => 200,
+              'status' => 'success',
+              'message' => 'El usuario Terapeuta se ha actualizado.',
+              'user' => $user,
+              'changes' => $params_array
+            );
+        } else {
+            $data = array(
+              'code' => 400,
+              'status' => 'error',
+              'message' => 'Tus credenciales no coinciden con el usuario que intentas actualizar'
+            );
+          }
       } else {
         $data = array(
           'code' => 400,
@@ -262,6 +273,27 @@ class TherapistController extends Controller
             
         }
 
+    }
+    
+    //method get Therapist
+    public function detail($id) {
+        $user = Therapist::find($id);
+        
+        if (is_object($user)) {
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'user' => $user
+            );
+        } else {
+            $data = array(
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'El usuario no existe.'
+              );
+        }
+        
+        return response()->json($data, $data['code']);
     }
 
     

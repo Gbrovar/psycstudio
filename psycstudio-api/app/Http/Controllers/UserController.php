@@ -128,8 +128,7 @@ class UserController extends Controller
         return response()->json($signup, 200);
         
     }
-    
-    
+       
     //metodo tokenControl
     public function tokenControl(Request $request) {
         $token = $request->header('Authorization');
@@ -155,9 +154,6 @@ class UserController extends Controller
         return response()->json($data, $data['code']);
     }
     
-
-    
-    
     //update method
     public function update(Request $request){
 
@@ -174,34 +170,46 @@ class UserController extends Controller
 
         //bring identified user
         $user = $jwtAuth->checkToken($token, true);
+        
+        $userId = User::where('id', $user->sub)
+                ->where('role', $user->role)
+                ->first();
+        
+        
+        if(!is_null($userId)){
+            //validate data
+            $validate = \Validator::make($params_array, [
+              'name' => 'required|alpha',
+              'surname' => 'required|alpha',
+              'email' => 'required|email|unique:users'.$user->sub
+            ]);
 
-        //validate data
-        $validate = \Validator::make($params_array, [
-          'name' => 'required|alpha',
-          'surname' => 'required|alpha',
-          'email' => 'required|email|unique:users'.$user->sub
-        ]);
-
-        //remove the values we don't want to update
-        unset($params_array['id']);
-        unset($params_array['password']);
-        unset($params_array['role']);
-        unset($params_array['remember_token']);
-        unset($params_array['created_at']);
+            //remove the values we don't want to update
+            unset($params_array['id']);
+            unset($params_array['password']);
+            unset($params_array['role']);
+            unset($params_array['remember_token']);
+            unset($params_array['created_at']);
 
 
-        //update user in DB
-        $user_update = User::where('id', $user->sub)->update($params_array);
+            //update user in DB
+            $user_update = User::where('id', $user->sub)->update($params_array);
 
-        //return result
-        $data = array(
-          'code' => 200,
-          'status' => 'success',
-          'message' => 'El usuario se ha actualizado.',
-          'user' => $user,
-          'changes' => $params_array
-        );
-
+            //return result
+            $data = array(
+              'code' => 200,
+              'status' => 'success',
+              'message' => 'El usuario se ha actualizado.',
+              'user' => $user,
+              'changes' => $params_array
+            );
+        } else {
+            $data = array(
+              'code' => 400,
+              'status' => 'error',
+              'message' => 'Tus credenciales no coinciden con el usuario que intentas actualizar'
+            );
+          }
       } else {
         $data = array(
           'code' => 400,
@@ -266,5 +274,26 @@ class UserController extends Controller
 
     }
     
+    //method get user
+    public function detail($id) {
+        $user = User::find($id);
+
+        if (is_object($user)) {
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'user' => $user
+            );
+        } else {
+            $data = array(
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'El usuario no existe.'
+              );
+        }
+        
+        return response()->json($data, $data['code']);
+    }
+
 }
 

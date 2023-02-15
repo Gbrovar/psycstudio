@@ -25,13 +25,13 @@ Route::get('/', function () {
 });
 
 // User Routes
-Route::get("/test", [UserController::class, "pruebas"]);
 Route::post("/api/user/register", [UserController::class, "register"]);
 Route::post("/api/user/login", [UserController::class, "login"]);
 Route::post("/api/user/token-control", [UserController::class, "tokenControl"]);
 Route::put("/api/user/update", [UserController::class, "update"]);
 Route::post("/api/user/upload", [UserController::class, "upload"])->middleware(ApiAuthMiddleware::class);
 Route::get("/api/user/avatar/{filename}", [UserController::class, "getImage"]);
+Route::get("/api/user/detail/{id}", [UserController::class, "detail"]);
 
 
 //Therapist Routes
@@ -41,4 +41,5 @@ Route::post("/api/therapist/token-control", [TherapistController::class, "tokenC
 Route::put("/api/therapist/update", [TherapistController::class, "update"]);
 Route::post("/api/therapist/upload", [TherapistController::class, "upload"])->middleware(ApiAuthMiddleware::class);
 Route::get("/api/therapist/avatar/{filename}", [TherapistController::class, "getImage"]);
+Route::get("/api/therapist/detail/{id}", [TherapistController::class, "detail"]);
 

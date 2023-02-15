@@ -21,12 +21,20 @@ class JwtAuth{
     public function signup($email, $password, $getToken = null) {
         //Buscar si existe el usuario con sus credenciales
 
-        $user = User::Where([   // <---- Aqui hay que buscar tambien al terapueuta. 
+        $user = null;
+
+        $user = Therapist::Where([   
                     'email' => $email,
                     'password' => $password,
         ])->first();
-
-        //var_dump($user); die();
+        
+        if(is_null($user)){
+            $user = User::Where([  
+                'email' => $email,
+                'password' => $password,
+            ])->first();
+        }
+        
         //comprobar si son correctas
         $signup = false;
         if(is_object($user)){
@@ -35,12 +43,13 @@ class JwtAuth{
         //generar un token con los datos del usuario
         if($signup) {           
             $token = array(
-                'sub'       =>  $user->id,
-                'email'     =>  $user->email,
-                'name'      =>  $user->name,
-                'surname'   =>  $user->surname,
-                'iat'       =>  time(), //time start token
-                'exp'       =>  time() + (60*60*24) //time expire token
+                'sub'           =>  $user->id,
+                'email'         =>  $user->email,
+                'name'          =>  $user->name,
+                'surname'       =>  $user->surname,
+                'role'          =>  $user->role,
+                'iat'           =>  time(), //time start token
+                'exp'           =>  time() + (60*60*24) //time expire token
             );
             
             $jwt = JWT::encode($token, $this->key, 'HS256');
