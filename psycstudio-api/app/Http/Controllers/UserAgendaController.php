@@ -47,12 +47,15 @@ class UserAgendaController extends Controller
         $json = $request->input('json', null);
         $params_array = json_decode($json, true);
         
+        
         if(!empty($params_array)){
             //validate data
             $validate = \Validator::make($params_array, [
-                'start_date' =>  'required|date_format:Y-m-d H:i:s'
+                'user_id' => 'required|integer',
+                'date_id' => 'required|integer|unique:user_dates',
+                'therapist_id' => 'required|integer'
             ]);
-
+            
             //store data in database
             if ($validate->fails()) {
                 $data = [
@@ -61,13 +64,18 @@ class UserAgendaController extends Controller
                     'message' => 'No se ha guardado la cita'
                 ];
             } else {
-                $date = new Therapist_dates();
-                $date->therapist_id = $params_array['therapist_id'];
-                $date->start_date = $params_array['start_date'];
-                $date->end_date = $params_array['start_date']; // +1Hour
-                $date->schedule_status = 'FREE';  //status of the created appointment: scheduled or free
-                $date->status = 'not attended';   //schedule_status options: not attended(default), attended, user not show, therapist not show.
-                $date->room_id = 'XXXXX';         //video call room id   
+                $date = new User_dates();
+                $date->user_id = $params_array['user_id'];
+                $date->date_id = $params_array['date_id'];
+                $date->therapist_id = $params_array['therapist_id']; 
+                //$date->status = '';  
+                //$date->transaction_id = '';   
+                //$date->user_plan = '';         
+                //$date->user_plan_id = ''; 
+                //$date->user_subscription = ''; 
+                //$date->user_subscription_id = ''; 
+                $date->payment_method = 'abc'; 
+                $date->room_id = 'abc'; 
                 $date->save();
 
                 $data = [

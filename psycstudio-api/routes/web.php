@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TherapistController;
 use App\Http\Controllers\TherapistAgendaController;
+use App\Http\Controllers\UserAgendaController;
 
 
 /*
