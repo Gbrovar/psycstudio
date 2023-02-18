@@ -117,7 +117,7 @@ class TherapistAgendaController extends Controller
             $data = [
                     'code' => 404,
                     'status' => 'error',
-                    'message' => 'Envie los datos correctos para actulizar la cita.'
+                    'message' => 'No se ha podido actualizar la cita.'
                 ];
         }
         //return response
