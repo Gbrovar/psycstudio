@@ -83,7 +83,43 @@ class TherapistAgendaController extends Controller
                 ];
         }
         
+        //return response
+        return response()->json($data, $data['code']);
+    }
+    
+    public function update($id, Request, $request){
+        //collect data by post
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
         
+        if(!empty($params_array)){
+            //validate data
+            $validate = \Validator::make($params_array, [
+                    'start_date' =>  'required|date_format:Y-m-d H:i:s'
+                ]);
+            
+            //modificar el final de la cita en razon a la nueva fecha de inico
+            
+            
+            //remove what we don't want to update
+            unset($params_array['id']);
+            unset($params_array['created_at']);
+            
+            //update appointment details
+            $date = Therapist_dates::where('id', $id)->update($params_array);
+            
+            $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'date' => $date
+                ];
+        } else {
+            $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'Envie los datos correctos para actulizar la cita.'
+                ];
+        }
         //return response
         return response()->json($data, $data['code']);
     }
