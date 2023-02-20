@@ -95,4 +95,30 @@ class UserAgendaController extends Controller
         //return response
         return response()->json($data, $data['code']);
     }
+    
+    //Destroy method
+    public function destroy($id, Request $request){
+        //get data
+        $appointment = User_dates::all();
+        
+        if(!empty($appointment)){
+            //delete appintment
+            $appointment->delete();
+
+            //return response
+            $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'therapist_dates' => $appointment
+                ];
+        } else {
+            $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'La cita no existe'
+                ];
+        }
+        //return response
+        return response()->json($data, $data['code']);     
+    }
 }
