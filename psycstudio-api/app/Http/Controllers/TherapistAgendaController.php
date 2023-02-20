@@ -6,12 +6,23 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Therapist_dates;
 use Carbon\Carbon;
+use App\Helpers\JwtAuth;
 
 class TherapistAgendaController extends Controller
 {
     public function __construct() {
         $this->middleware('api.auth', ['exept' => ['index', 'show']]);
     }
+    
+    private function getIdentity($request){
+        //get user logged in
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+
+        return $user;
+    }
+    
     public function index() {
         $appointments = Therapist_dates::all();
         
@@ -48,6 +59,10 @@ class TherapistAgendaController extends Controller
         $params_array = json_decode($json, true);
         
         if(!empty($params_array)){
+            
+            //get user logged in
+            $user = $this->getIdentity($request);
+            
             //validate data
             $validate = \Validator::make($params_array, [
                 'start_date' =>  'required|date_format:Y-m-d H:i:s'
@@ -98,6 +113,7 @@ class TherapistAgendaController extends Controller
         $params_array = json_decode($json, true);
         
         if(!empty($params_array)){
+            
             //validate data
             $validate = \Validator::make($params_array, [
                     'start_date' =>  'required|date_format:Y-m-d H:i:s'
@@ -113,8 +129,25 @@ class TherapistAgendaController extends Controller
             unset($params_array['id']);
             unset($params_array['created_at']);
             
+            //get user logged in
+            $user = $this->getIdentity($request);
+            
             //update appointment details
-            $date = Therapist_dates::where('id', $id)->update($newDate);
+            $date = Therapist_dates::where('id', $id)
+                    ->where('therapist_id', $user->sub)
+                    ->update($newDate); 
+            
+            //updateOrCreate es un metodo que actualiza o crea un objeto
+            //pero hay que utilizar otro metodo para pasar los datos:
+            /*
+             * $where = [
+             *      'id' => $id,
+             *      'user_sub' => $user->sub
+             * ];
+             * 
+             * $date = Therapist_dates::updateOrCreate($where, $newDate);
+             */
+            //Dentro del modelo hay que actualizar la propiedad filiable, para actualizar datos de modo macivo.
             
             $data = [
                     'code' => 200,
@@ -134,9 +167,14 @@ class TherapistAgendaController extends Controller
     
     //Destroy method
     public function destroy($id, Request $request){
+        //get user logged in
+        $user = $this->getIdentity($request);
+            
         //get data
-        $appointment = Therapist_dates::all();
-        
+        $appointment = Therapist_dates::where('id', $id)
+                ->where('therapist_id', $user->sub)
+                ->first();
+
         if(!empty($appointment)){
             //delete appintment
             $appointment->delete();

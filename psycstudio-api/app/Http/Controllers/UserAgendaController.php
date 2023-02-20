@@ -5,12 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\User_dates;
+use App\Helpers\JwtAuth;
 
 class UserAgendaController extends Controller
 {
     public function __construct() {
         $this->middleware('api.auth', ['exept' => ['index', 'show']]);
-    }  
+    }
+    
+    private function getIdentity($request){
+        //get user logged in
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        
+        return $user;
+    }
     
     public function index() {
         $appointments = User_dates::all();
@@ -47,8 +57,11 @@ class UserAgendaController extends Controller
         $json = $request->input('json', null);
         $params_array = json_decode($json, true);
         
-        
         if(!empty($params_array)){
+            
+            //get user logged in
+            $user = $this->getIdentity($request);
+            
             //validate data
             $validate = \Validator::make($params_array, [
                 'user_id' => 'required|integer',
@@ -98,8 +111,13 @@ class UserAgendaController extends Controller
     
     //Destroy method
     public function destroy($id, Request $request){
+        //get user logged in
+        $user = $this->getIdentity($request);
+        
         //get data
-        $appointment = User_dates::all();
+        $appointment = User_dates::where('id', $id)
+                ->where('user_id', $user->sub)
+                ->first();
         
         if(!empty($appointment)){
             //delete appintment
@@ -109,7 +127,7 @@ class UserAgendaController extends Controller
             $data = [
                     'code' => 200,
                     'status' => 'success',
-                    'therapist_dates' => $appointment
+                    'user_dates' => $appointment
                 ];
         } else {
             $data = [
