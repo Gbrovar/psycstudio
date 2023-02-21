@@ -5,12 +5,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class Therapist_dates extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
     
     protected $table = 'therapist_dates';
+    
+    protected $fillable = [
+        'schedule_status'
+    ];
       
     //Relacion de muchos a uno
     public function therapist_dates() {

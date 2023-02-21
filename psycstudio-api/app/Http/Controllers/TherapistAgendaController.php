@@ -24,7 +24,20 @@ class TherapistAgendaController extends Controller
     }
     
     public function index() {
+        
         $appointments = Therapist_dates::all();
+        
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'therapist_dates' => $appointments
+        ]);
+    }
+    
+    //get dates from unique therapist
+    public function therapist_dates($id) {  
+        //get data
+        $appointment = Therapist_dates::where('therapist_id', $id)->get();
         
         return response()->json([
             'code' => 200,
@@ -81,7 +94,7 @@ class TherapistAgendaController extends Controller
                 ];
             } else {
                 $date = new Therapist_dates();
-                $date->therapist_id = $params_array['therapist_id'];
+                $date->therapist_id = $user->sub;
                 $date->start_date = $params_array['start_date'];
                 $date->end_date = $end_date;
                 $date->schedule_status = 'FREE';  //status of the created appointment: scheduled or free
@@ -183,7 +196,8 @@ class TherapistAgendaController extends Controller
             $data = [
                     'code' => 200,
                     'status' => 'success',
-                    'therapist_dates' => $appointment
+                    'therapist_dates' => $appointment,
+                    'message' => 'La cita hasido eliminada'
                 ];
         } else {
             $data = [

@@ -35,22 +35,45 @@ class JwtAuth{
             ])->first();
         }
         
+        
         //comprobar si son correctas
         $signup = false;
         if(is_object($user)){
             $signup = true;
         } 
+        
         //generar un token con los datos del usuario
-        if($signup) {           
-            $token = array(
-                'sub'           =>  $user->id,
-                'email'         =>  $user->email,
-                'name'          =>  $user->name,
-                'surname'       =>  $user->surname,
-                'role'          =>  $user->role,
-                'iat'           =>  time(), //time start token
-                'exp'           =>  time() + (60*60*24) //time expire token
-            );
+        if($signup) {  
+            //var_dump($user->role); die();
+            
+            if($user->role == 'USER'){
+                $token = array(
+                    'sub'           =>  $user->id,
+                    'email'         =>  $user->email,
+                    'name'          =>  $user->name,
+                    'surname'       =>  $user->surname,
+                    'role'          =>  $user->role,
+                    'therapist_id'  =>  $user->therapist_id,
+                    'iat'           =>  time(), //time start token
+                    'exp'           =>  time() + (60*60*24) //time expire token
+                );
+            }elseif ($user->role == 'THERAPIST') {
+                $token = array(
+                    'sub'           =>  $user->id,
+                    'email'         =>  $user->email,
+                    'name'          =>  $user->name,
+                    'surname'       =>  $user->surname,
+                    'role'          =>  $user->role,
+                    'iat'           =>  time(), //time start token
+                    'exp'           =>  time() + (60*60*24) //time expire token
+                );               
+            }else {
+                $data = array(
+                    'status' => 'error',
+                    'message' => 'No se encontró al usuario'
+                );
+            }
+
             
             $jwt = JWT::encode($token, $this->key, 'HS256');
             $decoded = JWT::decode($jwt, new Key($this->key, 'HS256'));

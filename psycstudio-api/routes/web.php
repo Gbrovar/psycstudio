@@ -47,6 +47,8 @@ Route::get("/api/therapist/detail/{id}", [TherapistController::class, "detail"])
 
 //Agenda Therapist Routes
 Route::resource("/api/therapist-agenda", TherapistAgendaController::class);
+Route::get("/api/therapist/therapist-dates/{id}", [TherapistAgendaController::class, "therapist_dates"]);
 
 //Agenda User Routes
 Route::resource("/api/user-agenda", UserAgendaController::class);
+
